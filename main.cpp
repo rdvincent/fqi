@@ -200,18 +200,38 @@ void testClassification(int nfolds, const dataset &ts) {
   cout << "Accuracy: " << cmTotal.accuracy() << endl;
 }
 
+#include "getopt.h"
+
 int main(int argc, char **argv) {
-  int domain = 1;
+  const char *domain = "mc";
 
   Domain *pd;
   Regressor *pr;
   FQI *fqi;
   dataset ts1;
   dataset ts2;
+  int c;
+  int tflag = 0;
+  int sflag = 0;
+  while ((c = getopt(argc, argv, "tsd:")) != -1) {
+    switch (c) {
+    case 't':
+      tflag++;
+      break;
+    case 's':
+      sflag++;
+      break;
+    case 'd':
+      domain = optarg;
+      break;
+    case '?':
+      return 1;
+    default:
+      break;
+    }
+  }
 
-  switch (domain) {
-  default:
-  case 0:
+  if (tflag) {
     cout << "Testing classification with parkinsons.data." << endl;
     readparkinsons(ts1);
     testClassification(10, ts1);
@@ -220,25 +240,17 @@ int main(int argc, char **argv) {
     readhydro(ts2);
     testRegression(10, ts2);
     return 0;
-
-  case 1:
-    pd = CreateDomain("MC");
-    //pr = new ExtraTreeRegressor(pd->numActions, pd->numDimensions);
-    pr = new SingleETRegressor(pd->numActions, pd->numDimensions);
-    fqi = new FQI(pd, pr, 0.98, 400, 10, 10);
-    break;
-  case 2:
-    pd = CreateDomain("Bicycle");
-    pr = new SingleETRegressor(pd->numActions, pd->numDimensions);
-    fqi = new FQI(pd, pr, 0.98, 400, 10, 10);
-    break;
-  case 3:
-    pd = CreateDomain("HIV");
-    //pr = new ExtraTreeRegressor(pd->numActions, pd->numDimensions);
-    pr = new SingleETRegressor(pd->numActions, pd->numDimensions);
-    fqi = new FQI(pd, pr, 0.98, 400, 10, 30);
-    break;
   }
-  fqi->run();
+  else {
+    pd = CreateDomain(domain);
+    if (sflag) {
+      pr = new SingleETRegressor(pd->numActions, pd->numDimensions);
+    }
+    else {
+      pr = new ExtraTreeRegressor(pd->numActions, pd->numDimensions);
+    }
+    fqi = new FQI(pd, pr, 0.98, 400, 10, 30);
+    fqi->run();
+  }
   cout << "done!" << endl;
 }
