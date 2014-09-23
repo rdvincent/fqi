@@ -22,6 +22,7 @@ public:
   virtual double bestQvalue(const vector<double> &s) const = 0;
   virtual void train(const vector<dataset> &ts, bool updateOnly) = 0;
   virtual double meanQvalue(const vector<dataset> &ts) const = 0;
+  virtual bool compound() const = 0;
 };
 
 /*
@@ -39,6 +40,8 @@ public:
   ~ExtraTreeRegressor() {
     delete regressor;
   }
+
+  bool compound() const { return true; }
 
   int bestAction(const vector<double> &s) const {
     double max_q = -DBL_MAX;
@@ -103,6 +106,8 @@ public:
   ~SingleETRegressor() {
     delete regressor;
   }
+
+  bool compound() const { return false; }
 
   int bestAction(const vector<double> &s) const {
     double max_q = -DBL_MAX;

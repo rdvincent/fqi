@@ -31,7 +31,7 @@ public:
     this->maxIterations = maxIterations;
     this->maxRounds = maxRounds;
     this->nSubjects = nSubjects;
-    forestPerAction = false;
+    forestPerAction = regressor->compound();
   }
 
   ~FQI() {
