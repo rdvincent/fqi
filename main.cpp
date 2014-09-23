@@ -45,7 +45,7 @@ double mse(const dataset &ts, const ExtraTree &rf)
 /* Read the Parkinson's disease data (classification)
  */
 void readparkinsons(dataset &ts) {
-  ifstream src("parkinsons.data");
+  ifstream src("testing/parkinsons.data");
   string line;
 
   while (getline(src, line)) {
@@ -54,7 +54,7 @@ void readparkinsons(dataset &ts) {
     int p1 = 0;
     int p2 = 0;
     while ((p2 = line.find(',', p1)) != string::npos) {
-      tmp[i++] = strtod(line.substr(p1, p2).c_str(), NULL);
+      tmp[i++] = strtod(line.substr(p1, p2 - p1).c_str(), NULL);
       p1 = p2 + 1;
     }
     tmp[i++] = strtod(line.substr(p1).c_str(), NULL);
@@ -70,10 +70,45 @@ void readparkinsons(dataset &ts) {
   }
 }
 
+void readwdbc(dataset &ts) {
+  ifstream src("testing/wdbc.data");
+  string line;
+
+  while (getline(src, line)) {
+    double tmp[100];
+    int i = 0;
+    int n = 0;
+    int p1 = 0;
+    int p2 = 0;
+    while ((p2 = line.find(',', p1)) != string::npos) {
+      string subs = line.substr(p1, p2 - p1);
+
+      /* index 0 is ignored, index 1 is either 'M' or 'B', the rest are 
+       * features. 
+       */
+      if (n == 1) {
+        tmp[i++] = (subs.compare("M") == 0) ? 1.0 : -1.0;
+      }
+      else if (n >= 2) {
+        tmp[i++] = strtod(subs.c_str(), NULL);
+      }
+      n++;
+      p1 = p2 + 1;
+    }
+    tmp[i++] = strtod(line.substr(p1).c_str(), NULL);
+    datum d;
+    d.output =  tmp[0];
+    for (int j = 1; j < i; j++) {
+      d.attributes.push_back(tmp[j]);
+    }
+    ts.data.push_back(d);
+  }
+}
+
 /* Read the yacht hydrodynamics data (regression)
  */
 void readhydro(dataset &ts) {
-  ifstream src("yacht_hydrodynamics.data");
+  ifstream src("testing/yacht_hydrodynamics.data");
   string line;
 
   while (getline(src, line)) {
@@ -82,7 +117,7 @@ void readhydro(dataset &ts) {
     int p1 = 0;
     int p2 = 0;
     while ((p2 = line.find(' ', p1)) != string::npos) {
-      tmp[i++] = strtod(line.substr(p1, p2).c_str(), NULL);
+      tmp[i++] = strtod(line.substr(p1, p2 - p1).c_str(), NULL);
       p1 = p2 + 1;
     }
     tmp[i++] = strtod(line.substr(p1).c_str(), NULL);
@@ -208,8 +243,6 @@ int main(int argc, char **argv) {
   Domain *pd;
   Regressor *pr;
   FQI *fqi;
-  dataset ts1;
-  dataset ts2;
   int c;
   int tflag = 0;
   int sflag = 0;
@@ -232,13 +265,19 @@ int main(int argc, char **argv) {
   }
 
   if (tflag) {
+    dataset ts1, ts2, ts3;
+
     cout << "Testing classification with parkinsons.data." << endl;
     readparkinsons(ts1);
     testClassification(10, ts1);
 
+    cout << "Testing classification with wdbc.data." << endl;
+    readwdbc(ts2);
+    testClassification(10, ts2);
+
     cout << "Testing regression with yacht_hydrodynamics.data." << endl;
-    readhydro(ts2);
-    testRegression(10, ts2);
+    readhydro(ts3);
+    testRegression(10, ts3);
     return 0;
   }
   else {
