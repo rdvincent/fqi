@@ -1,25 +1,44 @@
+/** \file
+ * \brief Contains definitions of the datum and dataset classes used
+ * internally by the FQI algorithm.
+ *
+ * Copyright (c) 2008-2014 Robert D. Vincent.
+ */
+/** The class that represents a single data point in our larger \c dataset.
+ */
 class datum {
 public:
-  double output;
-  vector<double> attributes;
+  double output;                /*!< Q-function value for this point. */
+  vector<double> attributes;    /*!< State or state/action variables. */
 
   datum() {
   }
 
+  /** Construct a \c datum */
   datum(double o, vector<double> a) {
     output = o;
     attributes = a;
   }
 };
 
+/** The class that represents our training data in the FQI algorithm.
+ */
 class dataset {
 public:
-  vector<datum> data;
+  vector<datum> data;           /*!< The set of data points. */
 
-  int size() const { return data.size(); }
+  /** Returns the size of the dataset */
+  size_t size() const { return data.size(); }
 
-  int nd() const { return data[0].attributes.size(); }
+  /** Returns the number of dimensions in the data set. */
+  size_t nd() const { return data[0].attributes.size(); }
 
+  /** For a given number of training examples, returns a randomly-selected
+   * training and test dataset derived from this dataset.
+   * \param ntrain Number of training samples desired.
+   * \param train The resulting training dataset.
+   * \param test The resulting testing dataset.
+   */
   void randomFold(int ntrain, dataset &train, dataset &test) const {
     train.data.insert(train.data.begin(), data.begin(), data.end());
     random_shuffle(train.data.begin(), train.data.end());
@@ -27,13 +46,17 @@ public:
     train.data.resize(ntrain);
   }
 
+  /**
+   * Calculate the mean of the output values for the dataset.
+   * \return The mean (average) value of the output labels of the dataset.
+   */
   double outputMean() const {
-    int n = data.size();
+    size_t n = data.size();
     if (n == 0) {
       return 0.0;
     }
     else {
-      int i = 0;
+      size_t i = 0;
       double s = 0.0;
       while (i < n) {
         s += data[i].output;
@@ -42,28 +65,29 @@ public:
       return s / n;
     }
   }
-  
+
   /**
    * Calculate the mode of the outputs of the training set.
+   * \return The modal value of the output labels of the dataset.
    */
   double outputMode() const {
     /* For classification, choose the majority output rather
      * than the mean. TODO: Fix for multiclass?
      */
-    int n = data.size();
-    int p = 0;
-    for (int i = 0; i < n; i++) {
+    size_t n = data.size();
+    size_t p = 0;
+    for (size_t i = 0; i < n; i++) {
       if (data[i].output > 0.0) {
         p++;
       }
     }
-    int q = n - p;
+    size_t q = n - p;
     return (p > q) ? 1.0 : -1.0;
   }
 
   /**
    * Calculate the variance of the outputs of a set of training instances.
-   * @return The variance in the output labels of the dataset.
+   * \return The variance in the output labels of the dataset.
    */
   double outputVariance() const {
     double mean = outputMean();
@@ -78,10 +102,13 @@ public:
     return s / n;
   }
 
-  /** Return two vectors containing the minimum and maximum values
-   * along each dimension.
-   * @param minv The array of minimum values (to be filled in).
-   * @param maxv The array of maximum values (to be filled in).
+  /**
+   * Return two arrays containing the minimum and maximum values
+   * along each dimension. The arrays \b must be allocated to contain
+   * at least as many members as there are dimensions in the dataset.
+   *
+   * \param minv The resulting array of minimum values.
+   * \param maxv The resulting array of maximum values.
    */
   void getRanges(double maxv[], double minv[]) const {
     /* Find the minimum and maximum values
