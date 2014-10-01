@@ -1,14 +1,20 @@
-CXXFLAGS = -O3 -g
+TARGET = fqi
+CXXFLAGS = -Og -g -Wall
 HEADERS = *.h
 LINK.o = $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(LDFLAGS) $(TARGET_ARCH)
+OBJECTS = main.o domain.o
 
-all: main
+profile: CXXFLAGS += -pg
+profile: $(TARGET)
+
+all: $(TARGET)
 
 domain.o: domain.cpp domain.h
 
 main.o: main.cpp $(HEADERS)
 
-main: main.o domain.o
+$(TARGET): $(OBJECTS)
+	$(CXX) -o $(TARGET) $(OBJECTS)
 
 clean:
 	rm *.o
