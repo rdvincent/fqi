@@ -12,8 +12,7 @@
 using namespace std;
 
 #include "domain.h"
-
-extern double rndInterval(double, double);
+#include "random.h"
 
 /** Returns the sign of a real number.
  * \param x The number whose sign we wish to extract.
