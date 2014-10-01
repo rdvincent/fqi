@@ -4,6 +4,10 @@
  *
  * Copyright (c) 2008-2014 Robert D. Vincent.
  */
+#include <cmath>
+#include <cstdlib>
+#include "random.h"
+
 /**
  * Return a uniform random number between 0 and 1. Uses the library
  * rand() function, which is probably a bad idea.
