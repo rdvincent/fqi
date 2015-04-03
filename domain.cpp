@@ -128,7 +128,7 @@ public:
     return p;
   }
 
-  vector<double> initialState() const {
+  vector<double> initialState() {
     vector<double> s(numDimensions, 0.0);
 
     s[6] = M_PI;
@@ -291,7 +291,7 @@ public:
    * There are two other stable states, a "healthy infected" state,
    * and an "uninfected" state.
    */
-  vector<double> initialState() const {
+  vector<double> initialState() {
     vector<double> s(numDimensions);
 
     /* This is the "sick" initial state.
@@ -355,7 +355,7 @@ public:
    * \return A two-dimensional state vector consisting of a random legal
    * position and velocity.
    */
-  vector<double> initialState() const {
+  vector<double> initialState() {
     vector<double> s(numDimensions);
     s[0] = rndInterval(min_x, max_x);
     s[1] = rndInterval(min_v, max_v);
@@ -416,14 +416,20 @@ public:
  * this module.
  * \param name The name of the domain to create. It is not case-sensitive.
  * The default is HIV
+ * \param propfile The name of an optional property file, which will provide
+ * configuration information for the domain.
  * \return The domain object.
  */
-Domain *CreateDomain(const char *name) {
+Domain *CreateDomain(const char *name, const char *propfile) {
   if (!strcasecmp(name, "MC")) {
     return new MC();
   }
   else if (!strcasecmp(name, "Bicycle")) {
     return new Bicycle();
+  }
+  else if (!strcasecmp(name, "rf")) {
+    extern Domain *getRF(const char *);
+    return getRF(propfile);
   }
   else {
     return new HIV();

@@ -350,6 +350,7 @@ double testClassification(int nfolds, const dataset &ts) {
  */
 int main(int argc, char **argv) {
   const char *domain = "mc";
+  const char *propfile = NULL;
 
   Domain *pd;
   Regressor *pr;
@@ -357,7 +358,14 @@ int main(int argc, char **argv) {
   int c;
   int tflag = 0;
   int sflag = 0;
-  while ((c = getopt(argc, argv, "tsd:")) != -1) {
+  int M = 50;
+  int nmin = 2;
+  int n_iter = 400;
+  int n_traj = 30;
+  int n_round = 10;
+  double gamma = 0.98;
+
+  while ((c = getopt(argc, argv, "tsd:p:T:I:M:n:g:R:")) != -1) {
     switch (c) {
     case 't':
       tflag++;
@@ -367,6 +375,27 @@ int main(int argc, char **argv) {
       break;
     case 'd':
       domain = optarg;
+      break;
+    case 'p':
+      propfile = optarg;
+      break;
+    case 'T':
+      n_traj = atoi(optarg);
+      break;
+    case 'I':
+      n_iter = atoi(optarg);
+      break;
+    case 'M':
+      M = atoi(optarg);
+      break;
+    case 'n':
+      nmin = atoi(optarg);
+      break;
+    case 'g':
+      gamma = atof(optarg);
+      break;
+    case 'R':
+      n_round = atoi(optarg);
       break;
     case '?':
       return 1;
@@ -399,14 +428,14 @@ int main(int argc, char **argv) {
     return 0;
   }
   else {
-    pd = CreateDomain(domain);
+    pd = CreateDomain(domain, propfile);
     if (sflag) {
-      pr = new SingleETRegressor(pd->numActions, pd->numDimensions);
+      pr = new SingleETRegressor(pd->numActions, pd->numDimensions, M, nmin);
     }
     else {
-      pr = new ExtraTreeRegressor(pd->numActions, pd->numDimensions);
+      pr = new ExtraTreeRegressor(pd->numActions, pd->numDimensions, M, nmin);
     }
-    fqi = new FQI(pd, pr, 0.98, 400, 10, 30);
+    fqi = new FQI(pd, pr, gamma, n_iter, n_round, n_traj);
     fqi->run();
   }
   cout << "done!" << endl;

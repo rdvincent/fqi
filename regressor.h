@@ -90,9 +90,11 @@ public:
    * Construct an ExtraTreeRegressor.
    * \param na Number of actions.
    * \param nd Number of dimensions.
+   * \param M Number of trees in regressor.
+   * \param nmin Minimum size of splittable node.
    */
-  ExtraTreeRegressor(int na, int nd): Regressor(na) {
-    ExtraTree et(nd);
+ ExtraTreeRegressor(int na, int nd, size_t M, size_t nmin): Regressor(na) {
+    ExtraTree et(nd, M, nmin);
     regressor = new vector<ExtraTree>(na, et);
   }
 
@@ -166,9 +168,11 @@ public:
   /** Create a SingleETRegressor.
    * \param na Number of actions.
    * \param nd Number of dimensions.
+   * \param M Number of trees per forest.
+   * \param nmin Smallest splittable node.
    */
-  SingleETRegressor(int na, int nd): Regressor(na) {
-    regressor = new ExtraTree(nd+1);
+  SingleETRegressor(int na, int nd, size_t M, size_t nmin): Regressor(na) {
+    regressor = new ExtraTree(nd+1, M, nmin);
     this->nd = nd;
   }
 

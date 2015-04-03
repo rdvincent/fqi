@@ -48,7 +48,7 @@ public:
    * could be a random state.
    * \return An initial state.
    */
-  virtual vector<double> initialState() const = 0;
+  virtual vector<double> initialState() = 0;
 
   /**
    * Return a boolean that indicates whether the state is "terminal".
@@ -64,4 +64,4 @@ public:
   virtual bool isStochastic() { return false; }
 };
 
-extern Domain *CreateDomain(const char *);
+extern Domain *CreateDomain(const char *dname, const char *propfile);
