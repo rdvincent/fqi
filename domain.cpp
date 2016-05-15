@@ -431,6 +431,10 @@ Domain *CreateDomain(const char *name, const char *propfile) {
     extern Domain *getRF(const char *);
     return getRF(propfile);
   }
+  else if (!strcasecmp(name, "tass")) {
+    extern Domain *getTass(const char *);
+    return getTass(propfile);
+  }
   else {
     return new HIV();
   }
