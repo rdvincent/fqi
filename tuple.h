@@ -8,16 +8,16 @@
  * The class that represents an entry in the raw training set. Each tuple
  * represents an instance of the one-step dynamics of the RL environment.
  */
-class tuple {
+class fqi_tuple {
 public:
   vector<double> s;             /*!< Initial state. */
   int a;                        /*!< Action */
   double r;                     /*!< Reward */
   vector<double> sp;            /*!< Next state. */
 
-  /** Create a new instance of a tuple.
+  /** Create a new instance of a fqi_tuple.
    */
-  tuple(vector<double> s, int a, double r, vector<double> sp) {
+  fqi_tuple(vector<double> s, int a, double r, vector<double> sp) {
     this->s = s;
     this->a = a;
     this->r = r;

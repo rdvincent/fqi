@@ -17,7 +17,7 @@ public:
   int maxIterations;            /*!< Maximum number of FQI iterations.  */
   int maxRounds;                /*!< Maximum number of FQI rounds. */
   int nSubjects;                /*!< Number of simulated trajectories. */
-  vector<tuple> *tuples;        /*!< Raw training data. */
+  vector<fqi_tuple> *tuples;    /*!< Raw training data. */
   int numActions;               /*!< Number of action in the environment. */
   bool dynamicStopping;         /*!< Whether to stop each round dynamically. */
   bool forestPerAction;         /*!< Whether to use one forest per action. */
@@ -39,7 +39,7 @@ public:
       int maxRounds = 10,
       int nSubjects = 30) {
     this->domain = domain;
-    tuples = new vector<tuple>();
+    tuples = new vector<fqi_tuple>();
     explorePolicy = new EGreedy(regressor, 0.15);
     exploitPolicy = new EGreedy(regressor, 0.0);
     numActions = domain->numActions;
@@ -67,8 +67,8 @@ public:
    * policy derived from the current Q-function estimate. Also returns
    * the average discounted return of the generated episodes.
    */
-  pair<vector<tuple> *,double> generate(int P, int N, Policy *policy) const {
-    vector<tuple> *trajectory = new vector<tuple>;
+  pair<vector<fqi_tuple> *,double> generate(int P, int N, Policy *policy) const {
+    vector<fqi_tuple> *trajectory = new vector<fqi_tuple>;
     trajectory->reserve(P * N);
     double rtotal = 0.0;
     for (int p = 0; p < P; p++) {
@@ -79,7 +79,7 @@ public:
       while (n < N && !domain->isTerminal(s)) {
         int a = policy->getAction(s);
         OneStepResult pp = domain->performAction(s, a);
-        tuple t(s, a, pp.reward, pp.state);
+        fqi_tuple t(s, a, pp.reward, pp.state);
         if (debug) {
           if (domain->isTerminal(pp.state)) {
             cout << "t" << n << endl;
@@ -96,14 +96,14 @@ public:
       }
       rtotal += repisode;
     }
-    pair<vector<tuple> *,double> p(trajectory, rtotal / P);
+    pair<vector<fqi_tuple> *,double> p(trajectory, rtotal / P);
     return p;
   }
 
   /**
    * Prints a tuple vector in a somewhat readable format.
    */
-  void printTuples(const vector<tuple> &t1) const {
+  void printTuples(const vector<fqi_tuple> &t1) const {
     for (size_t m = 0; m < t1.size(); m++) {
       cout << m << ": " << t1[m].s << " " << t1[m].a << " " << t1[m].r << endl;
     }
@@ -123,7 +123,7 @@ public:
         ts[a].data.reserve(tuples->size());
       }
       for (size_t i = 0; i < tuples->size(); i++) {
-        tuple tuple = (*tuples)[i];
+        fqi_tuple tuple = (*tuples)[i];
         double output = tuple.r + gamma * regressor->bestQvalue(tuple.sp);
         datum d(output, tuple.s);
         ts[tuple.a].data.push_back(d);
@@ -134,7 +134,7 @@ public:
     else {
       ts[0].data.reserve(tuples->size());
       for (size_t i = 0; i < tuples->size(); i++) {
-        tuple tuple = (*tuples)[i];
+        fqi_tuple tuple = (*tuples)[i];
         double output = tuple.r + gamma * regressor->bestQvalue(tuple.sp);
         vector<double> attr = tuple.s;
         attr.push_back(tuple.a);
@@ -158,8 +158,8 @@ public:
     double q2 = 0.0;
 
     for (int r = 0; r < maxRounds; r++) {
-      pair<vector<tuple> *, double> p = generate(nSubjects, domain->numSteps, explorePolicy);
-      vector<tuple> *t0 = p.first;
+      pair<vector<fqi_tuple> *, double> p = generate(nSubjects, domain->numSteps, explorePolicy);
+      vector<fqi_tuple> *t0 = p.first;
 
       tuples->insert(tuples->begin(), t0->begin(), t0->end());
       delete t0;

@@ -1,8 +1,8 @@
 TARGET = fqi
 ifdef DEBUG
-CXXFLAGS = -Og -g -Wall
+CXXFLAGS = -Og -g -Wall -fpermissive
 else
-CXXFLAGS = -O3 -Wall
+CXXFLAGS = -O3 -Wall -fpermissive
 endif
 
 HEADERS = *.h
